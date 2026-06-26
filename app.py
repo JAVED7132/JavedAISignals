@@ -1,4 +1,3 @@
-
 import os
 import requests
 from telegram import Update
@@ -6,6 +5,7 @@ from telegram.ext import Application, CommandHandler, ContextTypes
 
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 API_KEY = os.getenv("TWELVE_API_KEY")
+
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -15,12 +15,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "/help - Help"
     )
 
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "/start\n"
         "/signal\n"
         "/help"
     )
+
 
 async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
     url = f"https://api.twelvedata.com/price?symbol=XAU/USD&apikey={API_KEY}"
@@ -35,17 +37,17 @@ async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         price = float(data["price"])
 
-        direction = "BUY 🟢" if int(price) % 2 == 0 else "SELL 🔴"
-
-        if "BUY" in direction:
+        if int(price) % 2 == 0:
+            direction = "BUY 🟢"
             tp = round(price + 20, 2)
             sl = round(price - 15, 2)
         else:
+            direction = "SELL 🔴"
             tp = round(price - 20, 2)
             sl = round(price + 15, 2)
 
-        text = (
-            "📊 AI Gold Signal\n\n"
+        await update.message.reply_text(
+            f"📊 AI Gold Signal\n\n"
             f"Pair: XAU/USD\n"
             f"Signal: {direction}\n"
             f"Entry: {price}\n"
@@ -53,28 +55,20 @@ async def signal(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"Stop Loss: {sl}"
         )
 
-        await update.message.reply_text(text)
-
     except Exception as e:
-        await update.message.reply_text(f"Error: {e}")
-
-app = Application.builder().token(BOT_TOKEN).build()
-
-app.add_handler(CommandHandler("start", start))
-app.add_handler(CommandHandler("help", help_command))
-app.add_handler(CommandHandler("signal", signal))
+        await update.message.reply_text(f"❌ Error: {e}")
 
 
-import asyncio
-
-async def main():
+def main():
     app = Application.builder().token(BOT_TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(CommandHandler("signal", signal))
 
-    await app.run_polling()
+    print("Bot is running...")
+    app.run_polling()
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
