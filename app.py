@@ -64,4 +64,4 @@ app.add_handler(CommandHandler("start", start))
 app.add_handler(CommandHandler("help", help_command))
 app.add_handler(CommandHandler("signal", signal))
 
-app.run_polling()
+app.run_polling(close_loop=False)
